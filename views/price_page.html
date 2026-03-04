@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypted</title>
+  <style>
+  body {
+    color: black;
+    background-color: #140152;
+  }
+</style>
+</head>
+<body>
+
+  <script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-ticker-tape.js"></script>
+
+<tv-ticker-tape symbols='BITSTAMP:BTCUSD,BITSTAMP:ETHUSD,TRADENATION:SOLANA,CRYPTOCAP:DOGE,CRYPTOCAP:USDT,CRYPTOCAP:BNB,CRYPTOCAP:USDC,CRYPTOCAP:XRP' show-hover transparent></tv-ticker-tape>
+
+
+
+<form action="/crypto" method="POST">
+  <input list="cryptoList" name="crypto" id="cryptoInput" placeholder="Search cryptocurrency...">
+  <datalist id="cryptoList"></datalist>
+  <button type="submit">Search</button>
+</form>
+<script>
+  async function loadCryptoList() {
+    try {
+      const res = await fetch("https://api.coingecko.com/api/v3/coins/list");
+      const coins = await res.json();
+
+      const list = document.getElementById("cryptoList");
+
+      coins.forEach(coin => {
+        const option = document.createElement("option");
+        option.value = coin.name;   // shows readable name
+        option.dataset.id = coin.id; // keeps ID if needed
+        list.appendChild(option);
+      });
+
+    } catch (error) {
+      console.error("Error loading crypto list:", error);
+    }
+  }
+
+  loadCryptoList();
+</script>
+
+
+
+
+</body>
+</html>

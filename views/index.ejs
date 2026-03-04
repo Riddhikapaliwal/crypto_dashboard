@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/styles/main.css">
+      <title>Crypted</title>
+     
+   </head>
+   <body>
+<script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-market-summary.js"></script>
+
+<tv-market-summary direction="horizontal" assets-type="crypto" transparent></tv-market-summary> <form action="/crypto" method="POST">
+         <input list="cryptoList" name="crypto" id="cryptoInput" placeholder="Search cryptocurrency...">
+         <datalist id="cryptoList"></datalist>
+         <button type="submit">Search</button>
+         </form>
+
+      <h1><%= coinName || "Crypto" %> : <span style="color:#52b788">$<%= price || "N/A" %><span></h1>
+      <canvas id="priceChart" width="400" height="200"></canvas>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+     <% if (locals.error) { %>
+    <div class="error">
+        <strong>Error:</strong> <%= error %>
+    </div>
+<% } %>
+<script>
+  const raw = <%- JSON.stringify(chartData || []) %>;
+
+  if (raw.length > 0) {
+    const labels = raw.map(p => new Date(p[0]).toLocaleDateString());
+    const prices = raw.map(p => p[1]);
+
+    const ctx = document.getElementById("priceChart").getContext("2d");
+
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          label: "<%= coinName %> Price (USD)",
+          data: prices,
+          borderColor: "#4bc0c0",
+          borderWidth: 2,
+          fill: false
+        }]
+      }
+    });
+  }
+</script>
+     <script>
+let coins = [];
+
+async function loadCryptoList() {
+  try {
+    const res = await fetch("https://api.coingecko.com/api/v3/coins/list");
+    coins = await res.json();
+  } catch (error) {
+    console.error("Error loading crypto list:", error);
+  }
+}
+
+loadCryptoList();
+
+document.getElementById("cryptoInput").addEventListener("input", function () {
+  const value = this.value.toLowerCase();
+  const list = document.getElementById("cryptoList");
+  list.innerHTML = "";
+
+  const filtered = coins
+    .filter(c => c.name.toLowerCase().includes(value))
+    .slice(0, 20); // show only top 20 matches
+
+  filtered.forEach(coin => {
+    const option = document.createElement("option");
+    option.value = coin.name;
+    list.appendChild(option);
+  });
+});
+</script>
+<footer>
+  <p style="font-family: Verdana, Geneva, Tahoma, sans-serif;">*Bitcoin: because banks need competition*     *In crypto we trust… until the WiFi drops*   *HODL — Humans Only Delay Losses*   *Buy the dip? More like buy the drip of tears.*</p>
+
+</footer>
+   </body>
+</html>
