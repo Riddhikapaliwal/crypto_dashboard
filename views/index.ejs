@@ -1,86 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/styles/main.css">
-      <title>Crypted</title>
-     
-   </head>
-   <body>
-<script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-market-summary.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles/main.css">
 
-<tv-market-summary direction="horizontal" assets-type="crypto" transparent></tv-market-summary> <form action="/crypto" method="POST">
-         <input list="cryptoList" name="crypto" id="cryptoInput" placeholder="Search cryptocurrency...">
-         <datalist id="cryptoList"></datalist>
-         <button type="submit">Search</button>
-         </form>
+    <title>Crypted</title>
+</head>
+<body class="bg-dark text-white"> <script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-market-summary.js"></script>
+    <tv-market-summary direction="horizontal" assets-type="crypto" transparent></tv-market-summary>
 
-      <h1><%= coinName || "Crypto" %> : <span style="color:#52b788">$<%= price || "N/A" %><span></h1>
-      <canvas id="priceChart" width="400" height="200"></canvas>
-      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-     <% if (locals.error) { %>
-    <div class="error">
-        <strong>Error:</strong> <%= error %>
+    <div class="container mt-4">
+        <form action="/crypto" method="POST" class="mb-4">
+            <div class="input-group">
+                <input list="cryptoList" name="crypto" id="cryptoInput" class="form-control" placeholder="Search cryptocurrency (e.g. bitcoin, btc)...">
+                <datalist id="cryptoList"></datalist>
+                <button class="btn btn-success" type="submit">Search</button>
+            </div>
+        </form>
+
+        <h1 class="display-4">
+            <%= coinName || "Select a Coin" %> : 
+            <span style="color:#52b788">$<%= price ? price.toLocaleString() : "N/A" %></span>
+        </h1>
+
+        <div class="chart-container shadow-sm p-3 mb-5 bg-black rounded">
+            <canvas id="priceChart" width="400" height="200"></canvas>
+        </div>
+<br>
+        <% if (locals.error) { %>
+            <div class="alert alert-danger">
+                <strong>Error:</strong> <%= error %>
+            </div>
+        <% } %>
+
+        <% if (chartData && chartData.length > 0) { %>
+            <div >
+                <h3>Historical Price Data (Last 24 Hours)</h3>
+                <div class="table-responsive">
+                    <table class="table table-hover table-dark ">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Price (USD)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% chartData.slice(-24).reverse().forEach(function(data) { 
+                                let date = new Date(data[0]).toLocaleString();
+                                let p = data[1].toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                            %>
+                                <tr>
+                                    <td><%= date %></td>
+                                    <td><%= p %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <% } %>
     </div>
-<% } %>
-<script>
-  const raw = <%- JSON.stringify(chartData || []) %>;
 
-  if (raw.length > 0) {
-    const labels = raw.map(p => new Date(p[0]).toLocaleDateString());
-    const prices = raw.map(p => p[1]);
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const raw = <%- JSON.stringify(chartData || []) %>;
 
-    const ctx = document.getElementById("priceChart").getContext("2d");
+        if (raw.length > 0) {
+            // Updated labels to show Time instead of just Date
+            const labels = raw.map(p => {
+                const d = new Date(p[0]);
+                return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            });
+            const prices = raw.map(p => p[1]);
 
-    new Chart(ctx, {
-      type: "line",
-      data: {
-        labels,
-        datasets: [{
-          label: "<%= coinName %> Price (USD)",
-          data: prices,
-          borderColor: "#4bc0c0",
-          borderWidth: 2,
-          fill: false
-        }]
-      }
-    });
-  }
-</script>
-     <script>
-let coins = [];
+            const ctx = document.getElementById("priceChart").getContext("2d");
+            new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels,
+                    datasets: [{
+                        label: "<%= coinName %> Price (USD)",
+                        data: prices,
+                        borderColor: "#52b788",
+                        backgroundColor: "rgba(82, 183, 136, 0.1)",
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3 // Makes the line curvy/smooth
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    </script>
 
-async function loadCryptoList() {
-  try {
-    const res = await fetch("https://api.coingecko.com/api/v3/coins/list");
-    coins = await res.json();
-  } catch (error) {
-    console.error("Error loading crypto list:", error);
-  }
-}
+    <script>
+        // Injected from backend
+        const coinsList = <%- JSON.stringify(fullList || []) %>; 
 
-loadCryptoList();
+        document.getElementById("cryptoInput").addEventListener("input", function () {
+            const value = this.value.toLowerCase().trim();
+            const list = document.getElementById("cryptoList");
+            list.innerHTML = "";
+            
+            if(value.length < 2) return; 
 
-document.getElementById("cryptoInput").addEventListener("input", function () {
-  const value = this.value.toLowerCase();
-  const list = document.getElementById("cryptoList");
-  list.innerHTML = "";
+            // Matches either name or symbol
+            const filtered = coinsList
+                .filter(c => c.name.toLowerCase().includes(value) || c.symbol.toLowerCase() === value)
+                .slice(0, 10); 
 
-  const filtered = coins
-    .filter(c => c.name.toLowerCase().includes(value))
-    .slice(0, 20); // show only top 20 matches
+            filtered.forEach(coin => {
+                const option = document.createElement("option");
+                option.value = coin.name;
+                list.appendChild(option);
+            });
+        });
+    </script>
+          <br>
+          <br>
+          <script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-ticker-tape.js"></script>
+<tv-ticker-tape symbols='OANDA:USDJPY,OANDA:USDCAD,OANDA:USDCHF,FX_IDC:USDKRW,FX_IDC:USDINR,FX_IDC:USDBRL,FX:USDZAR,FX_IDC:USDRUB,FX_IDC:USDEUR,FX_IDC:USDGBP' direction="vertical" show-hover theme="light"></tv-ticker-tape><br>
 
-  filtered.forEach(coin => {
-    const option = document.createElement("option");
-    option.value = coin.name;
-    list.appendChild(option);
-  });
-});
-</script>
-<footer>
-  <p style="font-family: Verdana, Geneva, Tahoma, sans-serif;">*Bitcoin: because banks need competition*     *In crypto we trust… until the WiFi drops*   *HODL — Humans Only Delay Losses*   *Buy the dip? More like buy the drip of tears.*</p>
+          <br>
 
-</footer>
-   </body>
+    <footer class="text-center mt-5 p-4 text-muted border-top border-secondary">
+        <p style="font-family: 'Courier New', Courier, monospace;">
+            *Bitcoin: because banks need competition* 
+            *In crypto we trust… until the WiFi drops* 
+            *HODL — Humans Only Delay Losses*
+        </p>
+    </footer>
+</body>
 </html>

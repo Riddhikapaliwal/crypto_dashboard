@@ -52,7 +52,7 @@ button:hover {
 canvas {
   display: block;
   margin: 40px auto;
-  width: 90% !important;   /* stretch across screen */
+  width: 70% !important;   /* stretch across screen */
   height: 500px !important; /* taller chart */
   background: #fff;
   border-radius: 12px;
@@ -85,4 +85,58 @@ footer {
 footer p {
   margin: 5px 0;
   font-style: italic;
+}
+
+/* Custom Table Styling */
+.table-responsive {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+table {
+    width: 90%;          /* Or whatever width you prefer */
+    max-width: 1000px;   /* Prevents it from getting too wide on huge monitors */
+    margin-left: auto;
+    margin-right: auto;
+    border-collapse: collapse;
+    background-color: white; /* Dark background */
+    color: black;
+    font-family: sans-serif;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #333;
+    text-align: center
+
+}
+
+th {
+    background-color: black;
+    color:#52b788;
+    text-transform: uppercase;
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+
+tr:hover {
+    background-color: #b7e4c7; /* Hover effect */
+}
+
+
+
+/* Make the price green in the table too */
+td:nth-child(2) {
+    color: #52b788;
+    font-weight: bold;
+}
+
+h3{
+  text-align: center;
+   margin: 20px 0;
+  font-size: 2rem;
+  color: #000;
 }
