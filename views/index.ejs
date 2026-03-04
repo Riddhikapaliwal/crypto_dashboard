@@ -4,55 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/styles/main.css">
-
-    <title>Crypted</title>
+    <title>Crypted | Analytics</title>
 </head>
-<body class="bg-dark text-white"> <script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-market-summary.js"></script>
+<body class="bg-dark text-white">
+    <script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-market-summary.js"></script>
     <tv-market-summary direction="horizontal" assets-type="crypto" transparent></tv-market-summary>
 
     <div class="container mt-4">
         <form action="/crypto" method="POST" class="mb-4">
             <div class="input-group">
-                <input list="cryptoList" name="crypto" id="cryptoInput" class="form-control" placeholder="Search cryptocurrency (e.g. bitcoin, btc)...">
+                <input list="cryptoList" name="crypto" id="cryptoInput" class="form-control" placeholder="Search (e.g. bitcoin, btc)..." required>
                 <datalist id="cryptoList"></datalist>
                 <button class="btn btn-success" type="submit">Search</button>
             </div>
         </form>
 
         <h1 class="display-4">
-            <%= coinName || "Select a Coin" %> : 
-            <span style="color:#52b788">$<%= price ? price.toLocaleString() : "N/A" %></span>
+            <span id="displayCoinName"><%= coinName || "Select a Coin" %></span> : 
+            <span id="displayPrice" style="color:#52b788">$<%= price ? price.toLocaleString() : "N/A" %></span>
         </h1>
 
         <div class="chart-container shadow-sm p-3 mb-5 bg-black rounded">
-            <canvas id="priceChart" width="400" height="200"></canvas>
+            <canvas id="priceChart" width="400" height="180"></canvas>
         </div>
-<br>
+
         <% if (locals.error) { %>
-            <div class="alert alert-danger">
-                <strong>Error:</strong> <%= error %>
-            </div>
+            <div class="alert alert-warning">⚠️ <%= error %></div>
         <% } %>
 
         <% if (chartData && chartData.length > 0) { %>
-            <div >
-                <h3>Historical Price Data (Last 24 Hours)</h3>
+            <div class="mt-4">
+                <h3>Price History (Last 24h)</h3>
                 <div class="table-responsive">
-                    <table class="table table-hover table-dark ">
-                        <thead>
-                            <tr>
-                                <th>Date & Time</th>
-                                <th>Price (USD)</th>
-                            </tr>
-                        </thead>
+                    <table class="table table-dark table-hover">
+                        <thead><tr><th>Time</th><th>Price (USD)</th></tr></thead>
                         <tbody>
-                            <% chartData.slice(-24).reverse().forEach(function(data) { 
-                                let date = new Date(data[0]).toLocaleString();
-                                let p = data[1].toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-                            %>
+                            <% chartData.slice(-24).reverse().forEach(function(data) { %>
                                 <tr>
-                                    <td><%= date %></td>
-                                    <td><%= p %></td>
+                                    <td><%= new Date(data[0]).toLocaleString() %></td>
+                                    <td><%= data[1].toLocaleString('en-US', { style: 'currency', currency: 'USD' }) %></td>
                                 </tr>
                             <% }); %>
                         </tbody>
@@ -63,76 +53,78 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const raw = <%- JSON.stringify(chartData || []) %>;
-
-        if (raw.length > 0) {
-            // Updated labels to show Time instead of just Date
-            const labels = raw.map(p => {
-                const d = new Date(p[0]);
-                return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            });
-            const prices = raw.map(p => p[1]);
-
-            const ctx = document.getElementById("priceChart").getContext("2d");
-            new Chart(ctx, {
-                type: "line",
-                data: {
-                    labels,
-                    datasets: [{
-                        label: "<%= coinName %> Price (USD)",
-                        data: prices,
-                        borderColor: "#52b788",
-                        backgroundColor: "rgba(82, 183, 136, 0.1)",
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.3 // Makes the line curvy/smooth
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-    </script>
 
     <script>
-        // Injected from backend
-        const coinsList = <%- JSON.stringify(fullList || []) %>; 
-
-        document.getElementById("cryptoInput").addEventListener("input", function () {
-            const value = this.value.toLowerCase().trim();
-            const list = document.getElementById("cryptoList");
-            list.innerHTML = "";
-            
-            if(value.length < 2) return; 
-
-            // Matches either name or symbol
-            const filtered = coinsList
-                .filter(c => c.name.toLowerCase().includes(value) || c.symbol.toLowerCase() === value)
-                .slice(0, 10); 
-
-            filtered.forEach(coin => {
-                const option = document.createElement("option");
-                option.value = coin.name;
-                list.appendChild(option);
-            });
+        // 1. Search Autocomplete
+        const coinsList = <%- JSON.stringify(fullList || []) %>;
+        document.getElementById("cryptoInput").addEventListener("input", function() {
+            const val = this.value.toLowerCase().trim();
+            const dl = document.getElementById("cryptoList");
+            dl.innerHTML = "";
+            if(val.length < 2) return;
+            coinsList.filter(c => c.name.toLowerCase().includes(val) || c.symbol.toLowerCase() === val)
+                     .slice(0, 10).forEach(c => {
+                         const opt = document.createElement("option");
+                         opt.value = c.name;
+                         dl.appendChild(opt);
+                     });
         });
-    </script>
-          <br>
-          <br>
-          <script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-ticker-tape.js"></script>
-<tv-ticker-tape symbols='OANDA:USDJPY,OANDA:USDCAD,OANDA:USDCHF,FX_IDC:USDKRW,FX_IDC:USDINR,FX_IDC:USDBRL,FX:USDZAR,FX_IDC:USDRUB,FX_IDC:USDEUR,FX_IDC:USDGBP' direction="vertical" show-hover theme="light"></tv-ticker-tape><br>
 
-          <br>
+        // 2. UNIFIED RESCUE (Handles Price & Chart if Server Fails)
+        async function runRescue() {
+            const coinName = "<%= coinName %>";
+            const serverPrice = "<%= price %>";
+            const serverChart = <%- JSON.stringify(chartData || []) %>;
+            
+            // Find the ID in our list to ensure correct API call
+            const coinData = coinsList.find(c => c.name === coinName) || { id: coinName.toLowerCase() };
+            const coinId = coinData.id;
+
+            if (coinId === "select a coin") return;
+
+            // Rescue Price
+            if (!serverPrice || serverPrice === "null") {
+                try {
+                    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`);
+                    const data = await res.json();
+                    document.getElementById("displayPrice").innerText = "$" + data[coinId].usd.toLocaleString();
+                } catch(e) { console.error("Price Rescue Failed"); }
+            }
+
+            // Rescue/Render Chart
+            let finalChartData = serverChart;
+            if (serverChart.length === 0) {
+                try {
+                    const res = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=7`);
+                    const data = await res.json();
+                    finalChartData = data.prices;
+                } catch(e) { console.error("Chart Rescue Failed"); }
+            }
+
+            if (finalChartData.length > 0) {
+                const ctx = document.getElementById("priceChart").getContext("2d");
+                new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: finalChartData.map(p => new Date(p[0]).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})),
+                        datasets: [{
+                            label: coinName + " Price",
+                            data: finalChartData.map(p => p[1]),
+                            borderColor: "#52b788",
+                            backgroundColor: "rgba(82,183,136,0.1)",
+                            fill: true, tension: 0.3
+                        }]
+                    }
+                });
+            }
+        }
+        runRescue();
+    </script>
 
     <footer class="text-center mt-5 p-4 text-muted border-top border-secondary">
-        <p style="font-family: 'Courier New', Courier, monospace;">
-            *Bitcoin: because banks need competition* 
-            *In crypto we trust… until the WiFi drops* 
-            *HODL — Humans Only Delay Losses*
-        </p>
+        <script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-ticker-tape.js"></script>
+        <tv-ticker-tape symbols='FX_IDC:USDINR,FX_IDC:USDEUR,BITSTAMP:BTCUSD' theme="dark"></tv-ticker-tape>
+        <p class="mt-3" style="font-family: monospace;">*In crypto we trust… until the WiFi drops*</p>
     </footer>
 </body>
 </html>

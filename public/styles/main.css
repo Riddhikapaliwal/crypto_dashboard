@@ -1,142 +1,163 @@
+/* Core Layout */
 body {
-  background-color: #b7e4c7;   /* classy mint green */
-  color: #000;                 /* black text */
-  font-family: 'Montserrat', sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
-
+    background-color: #b7e4c7;   /* classy mint green */
+    color: #000;                 /* black text */
+    font-family: 'Montserrat', Verdana, Geneva, Tahoma, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
 }
 
-/* Header */
-h1 {
-  text-align: center;
-  margin: 20px 0;
-  font-size: 2.5rem;
-  color: #000;
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
-/* Form */
-form {
-  display: flex;
-  justify-content: center;
-  margin: 20px 0;
+/* Typography */
+h1, h3 {
+    text-align: center;
+    margin: 20px 0;
+    color: #000;
 }
 
-input[list] {
-  padding: 10px;
-  border: 1px solid #000;
-  border-radius: 6px;
-  width: 300px;
-  outline: none;
+h1 { font-size: 2.5rem; }
+h3 { font-size: 2rem; }
+
+/* Search Form & Input Groups */
+.input-group {
+    display: flex;
+    justify-content: center;
+    gap: 0; /* Bootstrap style joins them */
+    max-width: 600px;
+    margin: 20px auto;
 }
 
-button {
-  padding: 10px 20px;
-  margin-left: 10px;
-  border: none;
-  background-color: #000;   /* black button */
-  color: #b7e4c7;           /* green text */
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease;
+.form-control {
+    padding: 12px;
+    border: 2px solid #000;
+    border-radius: 6px 0 0 6px; /* Rounded left */
+    width: 100%;
+    outline: none;
+    font-size: 1rem;
 }
 
-button:hover {
-  background-color: #333;
-  color: #fff;
+.btn-success {
+    padding: 10px 25px;
+    border: 2px solid #000;
+    border-left: none;
+    background-color: #000;   /* black button */
+    color: #b7e4c7;           /* green text */
+    border-radius: 0 6px 6px 0; /* Rounded right */
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
 }
 
-/* Chart container — make it bigger */
+.btn-success:hover {
+    background-color: #333;
+    color: #fff;
+}
+
+/* Chart Container */
+.chart-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    margin: 30px auto;
+    max-width: 1000px;
+}
+
 canvas {
-  display: block;
-  margin: 40px auto;
-  width: 70% !important;   /* stretch across screen */
-  height: 500px !important; /* taller chart */
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    width: 100% !important;
+    height: auto !important;
+    max-height: 500px;
 }
 
-/* Error message */
-.error {
-  background-color: #ff4d4d;
-  color: #fff;
-  padding: 12px;
-  border-radius: 6px;
-  margin: 20px auto;
-  max-width: 600px;
-  text-align: center;
+/* Alerts (Error Messages) */
+.alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px auto;
+    max-width: 600px;
+    text-align: center;
+    font-weight: bold;
 }
 
-/* Footer quotes */
-footer {
-  margin-top: auto;
-  background: #000;
-  padding: 15px;
-  text-align: center;
-  font-size: 1rem;
-  color: #b7e4c7;
-  border-top: 2px solid #000;
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
 }
 
-footer p {
-  margin: 5px 0;
-  font-style: italic;
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
 }
 
-/* Custom Table Styling */
+/* Table Styling */
 .table-responsive {
     overflow-x: auto;
     margin-top: 20px;
+    display: flex;
+    justify-content: center;
 }
 
 table {
-    width: 90%;          /* Or whatever width you prefer */
-    max-width: 1000px;   /* Prevents it from getting too wide on huge monitors */
-    margin-left: auto;
-    margin-right: auto;
+    width: 100%;
+    max-width: 1000px;
     border-collapse: collapse;
-    background-color: white; /* Dark background */
+    background-color: white;
     color: black;
-    font-family: sans-serif;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 th, td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #333;
-    text-align: center
-
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
 }
 
 th {
-    background-color: black;
-    color:#52b788;
+    background-color: #000;
+    color: #52b788;
     text-transform: uppercase;
-    font-size: 1rem;
+    font-size: 0.9rem;
     letter-spacing: 1px;
 }
 
 tr:hover {
-    background-color: #b7e4c7; /* Hover effect */
+    background-color: #f1f1f1;
 }
 
-
-
-/* Make the price green in the table too */
+/* Style for the price column in table */
 td:nth-child(2) {
-    color: #52b788;
+    color: #2d6a4f; /* Slightly darker green for readability on white */
     font-weight: bold;
 }
 
-h3{
-  text-align: center;
-   margin: 20px 0;
-  font-size: 2rem;
-  color: #000;
+/* Footer & Ticker */
+footer {
+    margin-top: auto;
+    background: #000;
+    padding: 20px;
+    text-align: center;
+    color: #b7e4c7;
+}
+
+footer p {
+    margin: 10px 0;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+/* Extra tweak for TradingView widgets */
+tv-market-summary, tv-ticker-tape {
+    margin-bottom: 10px;
 }
